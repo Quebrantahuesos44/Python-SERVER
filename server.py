@@ -2,45 +2,17 @@ print("Iniciando servidor...")
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import json
-import random
+from transformers import pipeline
 
 app = Flask(__name__)
-CORS(app)  # Permite que tu navegador haga peticiones sin error de CORS
+CORS(app)  # Permite que el navegador haga peticiones sin errores de CORS
 
-class IAUsuario:
-    def __init__(self, nombre_usuario):
-        self.nombre = nombre_usuario
-        self.memoria = self.cargar_memoria()
-
-    def responder(self, mensaje):
-        if mensaje.lower() in ["hola", "buenas"]:
-            respuesta = f"¡Hola {self.nombre}!"
-        else:
-            respuesta = random.choice(["Interesante...", "Cuéntame más.", "¿Por qué piensas eso?"])
-
-        self.memoria.append(mensaje)
-        self.guardar_memoria()
-        return respuesta
-
-    def guardar_memoria(self):
-        with open(f"{self.nombre}_memoria.json", "w") as archivo:
-            json.dump(self.memoria, archivo)
-
-    def cargar_memoria(self):
-        try:
-            with open(f"{self.nombre}_memoria.json", "r") as archivo:
-                return json.load(archivo)
-        except FileNotFoundError:
-            return []
-
-import os
-from flask import send_from_directory
+# Cargar el modelo GPT-2
+chatbot = pipeline("text-generation", model="gpt2")
 
 @app.route("/")
 def home():
-    return send_from_directory("static", "index.html")
-
+    return "¡Bienvenido a la API de la IA con GPT-2!"
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -48,18 +20,16 @@ def chat():
     nombre = datos.get("nombre", "Usuario")
     mensaje = datos.get("mensaje", "")
 
-    usuario_ia = IAUsuario(nombre)
-    respuesta = usuario_ia.responder(mensaje)
+    # Generar respuesta con GPT-2
+    respuesta_generada = chatbot(mensaje, max_length=50, num_return_sequences=1)[0]["generated_text"]
 
     return jsonify({
         "nombre": nombre,
         "mensaje": mensaje,
-        "respuesta": respuesta
+        "respuesta": respuesta_generada
     })
 
 if __name__ == "__main__":
-    # Arranca el servidor en modo debug en el puerto 5000
     import os
-port = int(os.environ.get("PORT", 5000))
-app.run(host="0.0.0.0", port=port, debug=False)
-
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
