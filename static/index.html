@@ -68,7 +68,8 @@
         document.getElementById("mensaje").value = "";
 
         // Hacer la petición POST a la IA
-        const response = await fetch("https://python-server-lebp.onrender.com", {
+        const response = await fetch("/chat", {
+
           method: "POST",
           headers: {
             "Content-Type": "application/json"

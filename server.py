@@ -34,9 +34,13 @@ class IAUsuario:
         except FileNotFoundError:
             return []
 
+import os
+from flask import send_from_directory
+
 @app.route("/")
 def home():
-    return "¡Bienvenido a la API de la IA!"
+    return send_from_directory("static", "index.html")
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
