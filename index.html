@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mi IA Chat</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      input {
+        padding: 5px;
+        margin: 5px 0;
+      }
+      button {
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+      #chat-box {
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        height: 200px;
+        overflow-y: auto;
+      }
+      .message {
+        margin: 5px 0;
+      }
+      .user {
+        color: blue;
+      }
+      .bot {
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Chat con IA</h1>
+
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" placeholder="Tu nombre" />
+
+    <br />
+
+    <label for="mensaje">Mensaje:</label>
+    <input type="text" id="mensaje" placeholder="Escribe tu mensaje" />
+
+    <br />
+    <button onclick="enviarMensaje()">Enviar</button>
+
+    <div id="chat-box">
+      <!-- Aquí mostraremos el historial de mensajes -->
+    </div>
+
+    <script>
+      async function enviarMensaje() {
+        const nombre = document.getElementById("nombre").value;
+        const mensaje = document.getElementById("mensaje").value;
+
+        // Mostrar el mensaje del usuario en pantalla
+        const chatBox = document.getElementById("chat-box");
+        const userMsg = document.createElement("div");
+        userMsg.classList.add("message", "user");
+        userMsg.textContent = `${nombre}: ${mensaje}`;
+        chatBox.appendChild(userMsg);
+
+        // Limpiar el input del mensaje
+        document.getElementById("mensaje").value = "";
+
+        // Hacer la petición POST a la IA
+        const response = await fetch("http://127.0.0.1:5000/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ nombre, mensaje })
+        });
+
+        // Convertir la respuesta a JSON
+        const data = await response.json();
+
+        // Mostrar la respuesta de la IA en pantalla
+        const botMsg = document.createElement("div");
+        botMsg.classList.add("message", "bot");
+        botMsg.textContent = `IA: ${data.respuesta}`;
+        chatBox.appendChild(botMsg);
+
+        // Hacer scroll automático hacia abajo
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    </script>
+  </body>
+</html>
